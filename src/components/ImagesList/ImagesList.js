@@ -1,5 +1,6 @@
 import { useState, useReducer, useEffect, useRef } from "react";
 import styles from "./ImagesList.module.css";
+import Spinner from "react-spinner-material";
 
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -24,11 +25,13 @@ import ImageItem from "./ImageItem";
 function ImagesList(props) {
   const [images, setImages] = useState([]);
   const [updateImage, setUpdateImage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const imageTitleRef = useRef();
   const imageUrlRef = useRef();
 
   const getData = async () => {
+    setLoading(true);
     let docRef = collection(db, "images");
     let albumDocRef = doc(db, "albums", props.album.id);
     let q = query(
@@ -43,6 +46,7 @@ function ImagesList(props) {
       }));
       console.log(data);
       setImages(data);
+      setLoading(false);
     });
   };
 
@@ -63,6 +67,7 @@ function ImagesList(props) {
 
   const createImageHandler = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const docNew = {
         album_id: doc(db, "albums", props.album.id),
@@ -70,17 +75,19 @@ function ImagesList(props) {
         url: imageUrlRef.current.value,
         created_at: new Date(),
       };
-  
+
       const docRef = collection(db, "images");
       await addDoc(docRef, docNew);
-  
+
       clearInput();
-  
+
       toast.success("Image created successfully.");
     } catch (error) {
       console.log(error);
       clearInput();
       toast.error("Something went wrong!!!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,6 +98,7 @@ function ImagesList(props) {
   const updateImageHandler = async (e) => {
     try {
       e.preventDefault();
+      setLoading(true);
       const docNew = {
         title: imageTitleRef.current.value,
         url: imageUrlRef.current.value,
@@ -109,10 +117,13 @@ function ImagesList(props) {
       setUpdateImage(null);
       clearInput();
       toast.error("Something went wrong!!!");
+    } finally {
+      setLoading(false);
     }
   };
 
   const deleteImageHandler = async (image_id) => {
+    setLoading(true);
     try {
       const docRef = doc(db, "images", image_id);
       await deleteDoc(docRef);
@@ -121,6 +132,8 @@ function ImagesList(props) {
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong!!!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -163,14 +176,18 @@ function ImagesList(props) {
         </div>
       </form>
       <div className="imagesListContainer">
-        {images.map((image) => (
-          <ImageItem
-            key={image.id}
-            image={image}
-            toSetUpdateImage={tosetUpdateImage}
-            deleteImageHandler={deleteImageHandler}
-          />
-        ))}
+        {loading ? (
+          <Spinner radius={50} color={"#fb607f"} stroke={5} visible={true} />
+        ) : (
+          images.map((image) => (
+            <ImageItem
+              key={image.id}
+              image={image}
+              toSetUpdateImage={tosetUpdateImage}
+              deleteImageHandler={deleteImageHandler}
+            />
+          ))
+        )}
       </div>
     </>
   );

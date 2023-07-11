@@ -1,5 +1,6 @@
 import { useState, useReducer, useEffect, useRef } from "react";
 import styles from "./AlbumsList.module.css";
+import Spinner from "react-spinner-material";
 
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -23,10 +24,12 @@ import AlbumItem from "./AlbumItem";
 function AlbumsList(props) {
   const [albums, setAlbums] = useState([]);
   const [updateAlbum, setUpdateAlbum] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const albumTitleRef = useRef();
 
   const getData = async () => {
+    setLoading(true);
     let docRef = collection(db, "albums");
     let q = query(docRef, orderBy("created_at", "desc"));
     onSnapshot(q, (snapShot) => {
@@ -36,6 +39,7 @@ function AlbumsList(props) {
       }));
       // console.log(data);
       setAlbums(data);
+      setLoading(false);
     });
   };
 
@@ -54,22 +58,25 @@ function AlbumsList(props) {
 
   const createAlbumHandler = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const docNew = {
         title: albumTitleRef.current.value,
         created_at: new Date(),
       };
-  
+
       const docRef = collection(db, "albums");
       await addDoc(docRef, docNew);
-  
+
       clearInput();
-  
+
       toast.success("Album created successfully.");
     } catch (error) {
       console.log(error);
       clearInput();
       toast.error("Something went wrong!!!");
+    }  finally {
+      setLoading(false);
     }
   };
 
@@ -79,6 +86,7 @@ function AlbumsList(props) {
 
   const updateAlbumHandler = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const docNew = {
         title: albumTitleRef.current.value,
@@ -97,10 +105,13 @@ function AlbumsList(props) {
       setUpdateAlbum(null);
       clearInput();
       toast.error("Something went wrong!!!");
+    }  finally {
+      setLoading(false);
     }
   };
 
   const deleteAlbumHandler = async (album_id) => {
+    setLoading(true);
     try {
       const docRef = doc(db, "albums", album_id);
       await deleteDoc(docRef);
@@ -109,6 +120,8 @@ function AlbumsList(props) {
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong!!!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,15 +144,19 @@ function AlbumsList(props) {
         </button>
       </form>
       <div className="listContainer">
-        {albums.map((album) => (
-          <AlbumItem
-            key={album.id}
-            album={album}
-            showAlbumImages={props.showAlbumImages}
-            toSetUpdateAlbum={tosetUpdateAlbum}
-            deleteAlbumHandler={deleteAlbumHandler}
-          />
-        ))}
+        {loading ? (
+          <Spinner radius={50} color={"#fb607f"} stroke={5} visible={true} />
+        ) : (
+          albums.map((album) => (
+            <AlbumItem
+              key={album.id}
+              album={album}
+              showAlbumImages={props.showAlbumImages}
+              toSetUpdateAlbum={tosetUpdateAlbum}
+              deleteAlbumHandler={deleteAlbumHandler}
+            />
+          ))
+        )}
       </div>
     </>
   );
