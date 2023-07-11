@@ -1,0 +1,61 @@
+.card {
+  width: 300px;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  border: 5px solid burlywood;
+  border-radius: 20px;
+  position: relative;
+  cursor: pointer;
+  margin: 20px;
+}
+
+.optionIcon {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  background-color: white;
+  position: absolute;
+  padding: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.optionIcon img {
+  height: 100%;
+  width: 100%;
+}
+
+.card:hover {
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+    rgba(0, 0, 0, 0.3) 0px 30px 60px -30px,
+    rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+  width: 400px;
+  height: 400px;
+}
+
+.cardItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imageUrl {
+  height: 90%;
+}
+
+.imageUrl img {
+  max-height: 95%;
+  max-width: 95%;
+}
+
+.imageTitle {
+  height: 15%;
+  background-color: burlywood;
+}
+
+.imageTitle h3{
+  overflow: hidden;
+}
