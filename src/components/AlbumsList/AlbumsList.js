@@ -16,6 +16,7 @@ import {
   onSnapshot,
   query,
   orderBy,
+  where,
 } from "firebase/firestore";
 import { db } from "../../firebaseInit";
 
@@ -75,7 +76,7 @@ function AlbumsList(props) {
       console.log(error);
       clearInput();
       toast.error("Something went wrong!!!");
-    }  finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -105,7 +106,7 @@ function AlbumsList(props) {
       setUpdateAlbum(null);
       clearInput();
       toast.error("Something went wrong!!!");
-    }  finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -114,6 +115,15 @@ function AlbumsList(props) {
     setLoading(true);
     try {
       const docRef = doc(db, "albums", album_id);
+
+      let imagesDocRef = collection(db, "images");
+      let q = query(imagesDocRef, where("album_id", "==", docRef));
+
+      let album_images = await getDocs(q);
+      album_images.docs.forEach(async (row) => {
+        let imageRef = doc(db, "images", row.id);
+        await deleteDoc(imageRef);
+      });
       await deleteDoc(docRef);
 
       toast.success("Album deleted successfully.");
